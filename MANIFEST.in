@@ -1,0 +1,8 @@
+include LICENSE
+include README.md
+
+recursive-include pyre_config py.typed
+recursive-include examples *.py *.yaml *.yml *.toml *.json
+recursive-include tests *.py
+
+global-exclude __pycache__/* *.py[cod]

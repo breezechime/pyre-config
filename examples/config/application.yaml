@@ -1,0 +1,7 @@
+app:
+  name: pyre-config-demo
+  debug: true
+
+logging:
+  level: INFO
+  format: '%(asctime)s %(levelname)s %(message)s'
