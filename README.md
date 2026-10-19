@@ -1,33 +1,29 @@
 # pyre-config
 
-轻量级 Python 配置管理库。多配置源、多环境、优先级覆盖与类型化访问，
-**核心零依赖**（仅标准库），可选按需接入 YAML / TOML / Pydantic / URL。
+<p>
+  <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/dependencies-zero-brightgreen" alt="Zero dependencies">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/badge/format-YAML%20%7C%20TOML%20%7C%20JSON-8a2be2" alt="Formats">
+</p>
 
-```python
-from pyre_config import ConfigLoader
+轻量级 Python 配置管理库：多配置源、多环境、优先级覆盖与类型化访问。
+**核心零依赖**（仅标准库），YAML / TOML / Pydantic / URL 按需接入。
 
-loader = ConfigLoader()
+## ✨ 特点
 
-# 扫描 ./config、./resource 下的 application.yaml / application.toml
-config, files = loader.init_app({'pyre.config.env': 'dev'})
+- 🚀 **轻量** — 核心只用标准库，安装即用，不把整个解析生态拖进项目。
+- 🎯 **多配置源** — 本地文件与 URL（`http://` / `https://`）统一抽象，同一套 API 读取。
+- 🗂 **多格式** — YAML、TOML、JSON，按扩展名自动匹配解析器。
+- 🌍 **多环境** — `application-dev.yaml` 这类环境文件，支持逗号分隔多环境与链式加载。
+- 🔀 **优先级覆盖** — 默认值 → 基础配置 → 环境配置 → 环境变量 → 命令行参数，逐层合并。
+- 🌱 **环境变量映射** — `PYRE_` / `SERVER_` 前缀自动展开成配置键路径。
+- ⌨️ **命令行覆盖** — 支持 `--key value` 与 `--key=value` 两种写法。
+- 🧬 **类型化配置** — 一行 `init_config(BaseModel)` 得到带校验的配置对象。
+- 💉 **注入装饰器** — `configuration_values` / `configuration_source` 把配置直接注入类实例。
+- 📦 **零必需依赖** — YAML、TOML、requests、Pydantic 全部可选，不装也能跑。
 
-config['server']['host']   # '0.0.0.0'
-config['server']['port']   # 8006
-```
-
-## 特性
-
-- **多配置源** — 本地文件与 URL（`http://` / `https://`）。
-- **多格式** — YAML、TOML、JSON，按扩展名自动匹配解析器。
-- **多环境** — `application-dev.yaml` 这类环境文件，支持逗号分隔多环境与链式加载。
-- **优先级覆盖** — 默认值 → 基础配置 → 环境配置 → 环境变量 → 命令行参数。
-- **环境变量映射** — `PYRE_` / `SERVER_` 前缀自动转成配置键。
-- **命令行覆盖** — 支持 `--key value` 与 `--key=value`。
-- **类型化配置模型** — 一行 `init_config(BaseModel)` 得到带校验的配置对象。
-- **注入装饰器** — `configuration` / `configuration_values` / `configuration_source`。
-- **零必需依赖** — 核心功能只用标准库；YAML、TOML、requests、Pydantic 全部可选。
-
-## 安装
+## 📦 安装
 
 ```bash
 pip install pyre-config
@@ -43,7 +39,41 @@ pip install "pyre-config[pydantic]"   # pydantic>=2
 pip install "pyre-config[all]"
 ```
 
-## 快速开始
+## 💡 一个简单的例子
+
+```python
+from pyre_config import ConfigLoader
+
+loader = ConfigLoader()
+
+# 扫描 ./config、./resource 下的 application.yaml / application.toml
+config, files = loader.init_app({'pyre.config.env': 'dev'})
+
+print(config['server']['host'])   # 0.0.0.0
+print(config['server']['port'])   # 8006
+print(files)                      # 实际加载的文件列表
+```
+
+## 👩‍💻 目录结构
+
+```text
+pyre-config
+├── pyre_config
+│   ├── __init__.py      # 对外导出
+│   ├── config.py        # 配置源：FileConfig / UrlConfig
+│   ├── parse.py         # 格式匹配与解析器
+│   ├── scanner.py       # 目录扫描与文件名匹配
+│   ├── loader.py        # 加载器：合并、优先级、环境链
+│   ├── environment.py   # 环境描述对象
+│   ├── decorators.py    # 注入装饰器
+│   ├── globals.py       # 激活实例
+│   └── utils.py         # 点号路径读写
+├── examples/            # 可运行示例
+├── tests/               # 单元测试
+└── setup.py
+```
+
+## 🚀 快速开始
 
 ### 目录约定
 
@@ -100,7 +130,7 @@ app_config = loader.init_config(AppConfig)
 app_config.server.port   # 8006，且已完成类型校验
 ```
 
-## 配置源
+## 🗂 配置源
 
 ### 文件
 
@@ -131,7 +161,7 @@ UrlConfig('https://example.com/application.yaml').get_dict()
 
 其它扩展名不会被扫描，直接解析会抛 `ConfigParseNotSupported`。
 
-## 优先级
+## 🔀 优先级
 
 从低到高依次覆盖：
 
@@ -150,7 +180,7 @@ loader.safe_merge_config_dict({'a': {'y': 3, 'z': 4}}, {'a': {'x': 1, 'y': 2}})
 # {'a': {'x': 1, 'y': 3, 'z': 4}}   —— 不修改入参
 ```
 
-## 配置文件约定
+## 📁 配置文件约定
 
 `ConfigScanner` 在 `config_locations` 中查找**文件名包含 `config_name`** 的文件：
 
@@ -167,7 +197,7 @@ scanner = ConfigScanner(config_locations=['./conf'], config_name='myapp')
 scanner.scanner()   # {'myapp.yaml': './conf/myapp.yaml', ...}
 ```
 
-## 环境变量
+## 🌱 环境变量
 
 前缀 `PYRE_` / `SERVER_` 会被保留为键路径的第一段，下划线 `_` 视为层级分隔符：
 
@@ -197,7 +227,7 @@ pyre:
 ConfigLoader.ENV_VAR_PREFIXS = ['MYAPP_']   # 之后 MYAPP_SERVER_PORT -> myapp.server.port
 ```
 
-## 命令行参数
+## ⌨️ 命令行参数
 
 ```bash
 python main.py --pyre.config.env=dev
@@ -214,7 +244,7 @@ ConfigLoader.parse_cmd_args(['--debug'])                    # {'debug': None}
 
 无值写法（`--debug`）得到 `None`；紧跟另一个 `--` 开头的参数时不会误吃为值。
 
-## 控制项
+## 🎛 控制项
 
 | 配置键 | 说明 |
 | --- | --- |
@@ -257,7 +287,7 @@ server:
 
 加载顺序为 `application` → `application-base` → `application-extra`，环境名会去重后写入 `pyre.config.envs`。
 
-## 配置模型与装饰器
+## 🧬 配置模型与装饰器
 
 ### init_config
 
@@ -312,7 +342,7 @@ class AppConfig:
     ...
 ```
 
-## 工具函数
+## 🧰 工具函数
 
 点号路径访问嵌套字典，支持列表下标：
 
@@ -340,7 +370,7 @@ expand_dotted_keys({'pyre.config.env': 'dev'})
 # {'pyre': {'config': {'env': 'dev'}}}
 ```
 
-## 运行环境
+## 🧭 运行环境
 
 `Environment` 描述当前生效的环境链，常由框架或应用自行构造后注入容器：
 
@@ -353,7 +383,7 @@ environment.is_prod()         # False
 environment.get_env_strings() # ['dev', 'test']
 ```
 
-## 与 Web 框架集成
+## 🔌 与 Web 框架集成
 
 `pyre-config` 不依赖任何 Web 框架。在框架侧只需三步：
 
@@ -363,7 +393,7 @@ environment.get_env_strings() # ['dev', 'test']
 
 `init_app()` 会顺带把当前加载器登记为「激活实例」，此后 `configuration_values` 装饰器即可直接取用。
 
-## API 参考
+## 📖 API 参考
 
 | 名称 | 说明 |
 | --- | --- |
@@ -377,13 +407,13 @@ environment.get_env_strings() # ['dev', 'test']
 | `configuration` / `configuration_values` / `configuration_source` | 注入装饰器 |
 | `get_active_loader` | 取当前激活的加载器 |
 
-## 开发
+## 🛠 开发
 
 ```bash
 pip install -e ".[all]" pytest
 pytest tests -q
 ```
 
-## 许可
+## 📄 许可
 
 本项目基于 [MIT](LICENSE) 许可开源。
